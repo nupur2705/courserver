@@ -8,6 +8,10 @@ import crypto from "crypto";
 import getDateUri from '../utils/dataUri.js'
 import cloudinary from 'cloudinary'
 import { Stats } from "../models/Stats.js";
+
+
+
+
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
 
@@ -287,3 +291,5 @@ User.watch().on("change",async()=>{
 
   await stats[0].save();
 })
+
+
