@@ -64,33 +64,35 @@ export const getCourseLectures = catchAsyncError(async (req,res,next) =>{
 
 // max video size 100mb
 export const addLecture = catchAsyncError(async (req,res,next) =>{
-    const {title,description} = req.body;
-    if (!title || !description) return next(new ErrorHandler("Please enter all fields", 400));
+  const { title, description } = req.body;
+  if (!title || !description)
+    return next(new ErrorHandler("Please enter all fields", 400));
 
-    const file = req.file;
+  const file = req.file;
+  console.log(file);
 
-    const course = await Course.findById(req.params.id);
-    if(!course) return next(new ErrorHandler("Course Not Found",404));
+  const course = await Course.findById(req.params.id);
+  if (!course) return next(new ErrorHandler("Course Not Found", 404));
 
-    const fileUri = getDateUri(file);
+  const fileUri = getDateUri(file);
+  console.log(fileUri);
 
-    const mycloud = await cloudinary.v2.uploader.upload(fileUri.content,{
-        resource_type:"video",
-    });
+  const mycloud = await cloudinary.v2.uploader.upload(fileUri.content, {
+    resource_type: "video",
+  });
 
+  course.lectures.push({
+    title,
+    description,
+    video: {
+      public_id: mycloud.public_id,
+      url: mycloud.secure_url,
+    },
+  });
+  course.numOfVideos = course.lectures.length;
+  await course.save();
 
-    course.lectures.push({
-        title,description,
-        video:{
-            public_id:mycloud.public_id,
-            url:mycloud.secure_url
-        }
-    })
-    course.numOfVideos = course.lectures.length;
-    await course.save();
-
-
-    res.status(200).json({message:"Lecture added in Course",success:true})
+  res.status(200).json({ message: "Lecture added in Course", success: true });
 })
 
 
